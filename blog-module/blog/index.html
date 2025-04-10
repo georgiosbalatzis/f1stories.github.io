@@ -6,8 +6,8 @@
     <title>F1 Stories - Blog</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../../styles.css">
-    <link rel="stylesheet" href="../../blog-module/blog-styles.css">
+    <link rel="stylesheet" href="#styles-path#">
+    <link rel="stylesheet" href="#blog-styles-path#">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -63,20 +63,20 @@
 <header>
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="/">
-                <img src="/images/logo.png" alt="F1 Stories Logo" height="50" onerror="this.src='/images/logo.png'">
+            <a class="navbar-brand" href="#">
+                <img src="#logo-path#" alt="F1 Stories Logo" height="50">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="../../index.html">Home</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="../../episodes/index.html" aria-current="page">Episodes</a></li>
-                    <li class="nav-item"><a class="nav-link" href="../../index.html#about">About</a></li>
-                    <li class="nav-item"><a class="nav-link" href="../../index.html#guests">Guests</a></li>
-                    <li class="nav-item"><a class="nav-link" href="../../blog-module/blog/index.html">Blog</a></li>
-                    <li class="nav-item"><a class="nav-link" href="../../index.html#contact">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Episodes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Guests</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="#">Blog</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
                 </ul>
             </div>
         </div>
@@ -175,14 +175,87 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Background Randomizer Script -->
-<script src="/scripts/background-randomizer.js"></script>
-<!-- Blog Loader Script with improved static hosting compatibility -->
-<script src="/blog-module/blog-loader.js"></script>
-<!-- Main Script -->
-<script src="/scripts/script.js"></script>
+<!-- Main Scripts -->
+<script src="#background-script-path#"></script>
+<script src="#blog-loader-path#"></script>
+<script src="#main-script-path#"></script>
 
-<!-- Navbar fix script -->
+<!-- Navigation path fixer -->
+<script>
+    (function() {
+        // Calculate the proper base path for this page
+        function getBasePath() {
+            const path = window.location.pathname;
+
+            // Special cases for root
+            if (path === '/' || path === '/index.html') {
+                return '';
+            }
+
+            // Count directory levels and generate path
+            const segments = path.split('/').filter(Boolean);
+            return '../'.repeat(segments.length);
+        }
+
+        // Fix links and resources when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const basePath = getBasePath();
+
+            // Fix navigation links
+            const navMap = {
+                'Home': basePath + 'index.html',
+                'Episodes': basePath + 'episodes/index.html',
+                'About': basePath + 'index.html#about',
+                'Guests': basePath + 'index.html#guests',
+                'Blog': basePath + 'blog-module/blog/index.html',
+                'Contact': basePath + 'index.html#contact'
+            };
+
+            // Update navbar links
+            document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+                const linkText = link.textContent.trim();
+                if (navMap[linkText]) {
+                    link.href = navMap[linkText];
+                }
+            });
+
+            // Fix logo link and image
+            const logoLink = document.querySelector('.navbar-brand');
+            if (logoLink) {
+                logoLink.href = basePath + 'index.html';
+
+                const logoImg = logoLink.querySelector('img');
+                if (logoImg) {
+                    logoImg.src = basePath + 'images/logo.png';
+                }
+            }
+
+            // Replace placeholder paths in stylesheet links
+            document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === '#styles-path#') {
+                    link.href = basePath + 'styles.css';
+                } else if (href === '#blog-styles-path#') {
+                    link.href = basePath + 'blog-module/blog-styles.css';
+                }
+            });
+
+            // Replace placeholder paths in script tags
+            document.querySelectorAll('script[src]').forEach(script => {
+                const src = script.getAttribute('src');
+                if (src === '#background-script-path#') {
+                    script.src = basePath + 'scripts/background-randomizer.js';
+                } else if (src === '#main-script-path#') {
+                    script.src = basePath + 'scripts/script.js';
+                } else if (src === '#blog-loader-path#') {
+                    script.src = basePath + 'blog-module/blog-loader.js';
+                }
+            });
+        });
+    })();
+</script>
+
+<!-- Script to fix navbar functionality -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Ensure the navbar toggle works
@@ -194,41 +267,6 @@
                 navbarCollapse.classList.toggle('show');
             });
         }
-
-        // Fix any path issues in the navbar links
-        const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
-        navLinks.forEach(link => {
-            // If it's a hash link without a base path, add one
-            if (link.getAttribute('href').startsWith('#')) {
-                link.setAttribute('href', '/index.html' + link.getAttribute('href'));
-            }
-        });
-    });
-</script>
-
-<!-- Error logging for debugging -->
-<script>
-    window.addEventListener('error', function(e) {
-        console.log('Global error handler:', e.message, e.filename, e.lineno);
-    });
-
-    // Fallback image handler
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('img').forEach(img => {
-            img.addEventListener('error', function() {
-                // Check if already has an onerror handler set (to avoid loops)
-                if (!this.hasAttribute('data-error-handled')) {
-                    this.setAttribute('data-error-handled', 'true');
-
-                    // Try relative path as fallback for absolute paths
-                    if (this.src.startsWith('/')) {
-                        const relativePath = this.src.substring(1);
-                        console.log('Trying relative path:', relativePath);
-                        this.src = relativePath;
-                    }
-                }
-            });
-        });
     });
 </script>
 </body>
