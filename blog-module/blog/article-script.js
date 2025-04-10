@@ -1,19 +1,22 @@
-// Article-specific JavaScript functionality
+// Enhanced article-specific JavaScript functionality to improve navigation
 
 document.addEventListener('DOMContentLoaded', function() {
     // Hide navigation buttons if no previous/next article
     const prevLink = document.getElementById('prev-article-link');
     const nextLink = document.getElementById('next-article-link');
 
-    if (prevLink && prevLink.getAttribute('href') === 'PREV_ARTICLE_URL' ||
-        prevLink && prevLink.getAttribute('href') === '') {
+    if (prevLink && (prevLink.getAttribute('href') === 'PREV_ARTICLE_URL' ||
+        prevLink.getAttribute('href') === '')) {
         prevLink.style.display = 'none';
     }
 
-    if (nextLink && nextLink.getAttribute('href') === 'NEXT_ARTICLE_URL' ||
-        nextLink && nextLink.getAttribute('href') === '') {
+    if (nextLink && (nextLink.getAttribute('href') === 'NEXT_ARTICLE_URL' ||
+        nextLink.getAttribute('href') === '')) {
         nextLink.style.display = 'none';
     }
+
+    // Make related article cards clickable
+    makeRelatedArticlesClickable();
 
     // Back to Top Button Functionality
     const scrollToTopBtn = document.getElementById('scroll-to-top');
@@ -164,6 +167,99 @@ document.addEventListener('DOMContentLoaded', function() {
         image.style.cursor = 'pointer';
     });
 });
+
+// Make related articles clickable
+function makeRelatedArticlesClickable() {
+    // Select all blog cards in the related articles section
+    const relatedArticles = document.querySelectorAll('.row.mt-5 .blog-card');
+
+    relatedArticles.forEach(card => {
+        // Extract the URL from the Read More link
+        const readMoreLink = card.querySelector('.blog-read-more');
+        if (readMoreLink) {
+            const articleUrl = readMoreLink.getAttribute('href');
+
+            // Add data attribute to the card
+            card.setAttribute('data-article-url', articleUrl);
+
+            // Make the entire card clickable
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', function(e) {
+                // Don't trigger if they clicked on the read more link
+                if (e.target.closest('.blog-read-more')) return;
+
+                // Navigate to the article
+                window.location.href = this.getAttribute('data-article-url');
+            });
+
+            // Add click ripple effect
+            card.addEventListener('mousedown', createRippleEffect);
+        }
+    });
+
+    // Add CSS for clickable related articles
+    addRelatedArticlesStyles();
+}
+
+// Create ripple effect on click
+function createRippleEffect(e) {
+    const card = this;
+
+    // Create ripple element
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    card.appendChild(ripple);
+
+    // Set position
+    const rect = card.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = e.clientX - rect.left - size/2 + 'px';
+    ripple.style.top = e.clientY - rect.top - size/2 + 'px';
+
+    // Remove after animation completes
+    ripple.addEventListener('animationend', function() {
+        ripple.remove();
+    });
+}
+
+// Add CSS styles for related articles
+function addRelatedArticlesStyles() {
+    if (!document.getElementById('related-articles-styles')) {
+        const style = document.createElement('style');
+        style.id = 'related-articles-styles';
+        style.textContent = `
+            .row.mt-5 .blog-card {
+                position: relative;
+                overflow: hidden;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            
+            .row.mt-5 .blog-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0, 115, 230, 0.2);
+            }
+            
+            .row.mt-5 .blog-card .ripple {
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(0, 255, 255, 0.1);
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+            }
+            
+            @keyframes ripple {
+                to {
+                    transform: scale(2.5);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
 
 // Check if the back to top button is missing and add it if needed
 document.addEventListener('DOMContentLoaded', function() {
